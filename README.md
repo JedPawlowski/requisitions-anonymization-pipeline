@@ -161,7 +161,7 @@ The script is intentionally ordered to avoid data dependency issues:
 - **Readable and maintainable** (single-pass pipeline)
 
 ### Technologies Used
-- Python 3.x
+- Python 3.14
 - pandas
 - numpy
 - Faker
