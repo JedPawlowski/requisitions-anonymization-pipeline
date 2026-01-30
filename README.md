@@ -239,8 +239,11 @@ pip install pandas numpy faker
 
 ### Required Files
 requisitions_raw.xlsx - raw ATS extract (not included)
+
 job_reference_table.xlsx - job taxonomy reference
+
 geo_reference.csv - geographic reference data
+
 anonymize_requisitions.py - main script
 
 ### Run the Script
@@ -248,5 +251,7 @@ python anonymize_requisitions.py
 
 ### Output
 requisitions_anonymized.xlsx
+
 Fully anonymized, analytics-ready dataset
+
 Safe for demos, testing, and BI development
