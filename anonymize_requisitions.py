@@ -3,6 +3,12 @@ import numpy as np
 from faker import Faker
 import re
 
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent        # scripts/
+PROJECT_DIR = BASE_DIR.parent                    # recruitment_data_anonymization/
+DATA_DIR = PROJECT_DIR / "requisitions"
+
 # ============================================================
 # Configuration & reproducibility
 # ============================================================
@@ -20,7 +26,7 @@ print("Python script started")
 # Load job reference dimension
 # -------------------------------------------------
 
-job_ref = pd.read_excel("job_reference_table.xlsx")
+job_ref = pd.read_excel(DATA_DIR / "job_reference_table.xlsx")
 job_ref.columns = job_ref.columns.str.strip()
 
 print("Job reference table loaded")
@@ -38,7 +44,7 @@ TITLE_TO_PROGRAMME = dict(zip(job_ref["Job Posting Title"], job_ref["Programme T
 # Load Excel (non-standard header handled explicitly)
 # ============================================================
 
-df = pd.read_excel(INPUT_FILE, header=3)
+df = pd.read_excel(DATA_DIR / "requisitions_raw.xlsx", header=3)
 df.columns = df.columns.str.strip()
 
 # -------------------------------------------------
@@ -46,7 +52,7 @@ df.columns = df.columns.str.strip()
 # -------------------------------------------------
 
 geo_ref = pd.read_csv(
-    "geo_reference.csv",
+    DATA_DIR / "geo_reference.csv",
     encoding="utf-8-sig",
     header=0
 )
@@ -67,18 +73,6 @@ print(f"Columns: {len(df.columns)}")
 
 # Work on a copy (raw data remains untouched)
 df_anon = df.copy()
-
-# --- String & text helpers ---
-
-def normalize_name(value):
-    if pd.isna(value):
-        return None
-    return str(value).strip()
-
-def scrub_string(value):
-    if isinstance(value, str):
-        return re.sub(r"medtronic", "", value, flags=re.IGNORECASE)
-    return value
 
 # --- Dimension anonymization helpers ---
 
@@ -139,9 +133,6 @@ people_cols = [
     "Primary Sourcer",
     "Recruiters as of Most Recent Fill Date"
 ]
-
-for col in people_cols:
-    df_anon[col] = df_anon[col].apply(normalize_name)
 
 unique_people = set()
 for col in people_cols:
@@ -251,7 +242,7 @@ df_anon[["City", "County", "Currency"]] = (
 df_anon["Advertising Country"] = df_anon["Country"]
 
 # ============================================================
-# Dates (single global offset)
+# Create synthetic date columns
 # ============================================================
 
 date_cols = [
@@ -264,12 +255,9 @@ date_cols = [
     "Earliest Job Posting Start Date"
 ]
 
-offset_days = np.random.randint(180, 365)
-print(f"Date offset applied: {offset_days} days")
-
 for col in date_cols:
     if col in df_anon.columns:
-        df_anon[col] = pd.to_datetime(df_anon[col], errors="coerce") + pd.Timedelta(days=offset_days)
+        df_anon[col] = pd.to_datetime(df_anon[col], errors="coerce")
 
 # Created By HM should be based on Request Completed Date
 if "Request Completed Date" in df_anon.columns:
@@ -361,7 +349,7 @@ else:
     df_anon["Pipeline (Evergreen)"] = "No"
 
 # ============================================================
-# Free-text cleanup & final defensive scrub
+# Free-text cleanup
 # ============================================================
 
 text_cols = [
@@ -375,10 +363,7 @@ for col in text_cols:
     if col in df_anon.columns:
         df_anon[col] = None
 
-for col in df_anon.select_dtypes(include="object"):
-    df_anon[col] = df_anon[col].apply(scrub_string)
-
-print("Free-text cleared and global scrub applied")
+print("Free-text cleared")
 
 # ============================================================
 # Requisitions schema – final column selection & renaming
