@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This project demonstrates a production-style Python pipeline for anonymizing ATS requisition data while preserving analytical value for BI and reporting use cases.
+This project demonstrates a production-ready Python anonymization pipeline for recruitment requisitions data.  .
 
 The script transforms a raw requisitions export into a fully anonymized, analytics-ready dataset by:
 - removing or anonymizing personal and sensitive information
@@ -10,26 +10,19 @@ The script transforms a raw requisitions export into a fully anonymized, analyti
 - maintaining analytical usability for BI, reporting, and demos
 
 The solution is designed to be:
-- compliant with data privacy requirements
-- reproducible and deterministic
-- suitable for sharing with stakeholders, interviewers, and portfolio reviews
+- Client-agnostic (no hard-coded company names or identifiers)
+- Safe for demos, analytics development, and portfolio use
+- Reusable across multiple clients and datasets
 
 ## Business Problem & Use Case
 
-HR and Talent Acquisition teams frequently need to share requisition-level data for:
-- BI dashboards and analytics development
-- system demos and proof-of-concept work
-- training and internal enablement
-- external vendors or consulting engagements
+Recruitment data often contains highly sensitive information, including personal data, internal structures, compensation ranges, and operational timelines.  
+Sharing such data for analytics development, dashboard prototyping, or stakeholder demonstrations requires a robust anonymization approach that maintains realism without exposing confidential information.
 
-However, raw ATS exports contain:
-- personally identifiable information (PII)
-- sensitive organizational structures
-- confidential salary and hiring details
-
-This creates a conflict between:
-- data privacy and compliance requirements
-- the need for realistic, analyzable datasets
+The goal of this project is to:
+- Enable analytics and data modeling work without access to real client data
+- Preserve meaningful recruitment logic (e.g. workflows, timelines, job structures)
+- Support centralized reporting models across multiple clients
 
 ### Solution
 
@@ -62,45 +55,42 @@ The script is designed to handle these challenges defensively and consistently.
 
 ## Anonymization Strategy
 
-The goal of anonymization is to remove or obscure all sensitive and personally identifiable information (PII) while preserving analytical usefulness and internal consistency.
+The anonymization logic focuses on structural realism rather than raw data masking.
 
-### Identifiers
-- **Job Requisition ID** values are replaced with synthetic IDs (`REQ_000001`, `REQ_000002`, …)
-- Referential integrity is preserved across the dataset
+Key principles:
+- No client-specific identifiers, names, or keywords are hard-coded
+- All anonymization logic is deterministic or controlled-random for consistency
+- Original business logic and relationships are preserved
 
-### People & Personal Data
-- Names of hiring managers, recruiters, and sourcers are replaced with realistic synthetic names generated using Faker
-- The same real person is always mapped to the same anonymized identity within a single run
-- No emails, usernames, or free-text identifiers are preserved
+### Applied Techniques
 
-### Organizational Data
-- Organizational structures (e.g. Operating Structure) are anonymized using deterministic labels
-- Original hierarchy depth is preserved while removing identifiable naming
+- **Identifiers**
+  - Job Requisition IDs are replaced with sequential surrogate keys
 
-### Job & HR Taxonomy
-- Job Posting Titles are replaced using a controlled vocabulary from a reference table
-- Related attributes are derived logically:
-  - Job Family
-  - Job Grade
-  - Programme Type
-- This ensures internally consistent HR data suitable for analytics and demos
+- **People**
+  - All personal names (Hiring Managers, Recruiters, Sourcers) are replaced using Faker
+  - No original names or emails are retained
 
-### Location & Geography
-- City, region, and currency are derived from a country-level reference table
-- Values are randomly sampled per record but remain realistic and geographically valid
+- **Organizational Structure**
+  - Operating Structure values are anonymized using generated dimension codes
 
-### Compensation
-- Salary ranges are generated based on job grade
-- Values are realistic but not traceable to any real compensation data
+- **Job Taxonomy**
+  - Job Posting Titles are replaced with values from a reference dimension
+  - Job Family, Job Grade, and Programme Type are derived consistently from the reference table
 
-### Dates
-- All dates are shifted by a single random offset
-- Relative timing between events is preserved
-- Seasonal and pipeline patterns remain intact
+- **Compensation**
+  - Salary ranges are generated based on Job Grade bands
+  - Values are realistic but non-identifiable
 
-### Free-Text Fields
-- Free-text fields are fully cleared to eliminate any risk of hidden sensitive data
-- A defensive global scrub removes company-specific references
+- **Geography**
+  - City, County, and Currency are derived from a country-level reference table
+
+- **Dates**
+  - Original date values from the raw file are preserved to maintain realistic timelines
+  - Derived dates (e.g. Approved Date, Posting Dates) are generated using logical offsets
+
+- **Free Text**
+  - All free-text fields are explicitly cleared
 
 ## Technical Architecture & Processing Flow
 
@@ -155,10 +145,10 @@ The script is intentionally ordered to avoid data dependency issues:
    - Columns renamed to target reporting schema
 
 ### Design Principles
-- **Deterministic where required** (IDs, people mapping)
-- **Randomized where safe** (cities, salaries, dates)
-- **Stateless execution** (no external dependencies)
-- **Readable and maintainable** (single-pass pipeline)
+- Deterministic where required (IDs, people mapping)
+- Randomized where safe (cities, salaries, dates)
+- Stateless execution (no external dependencies)
+- Readable and maintainable (single-pass pipeline)
 
 ### Technologies Used
 - Python 3.14
@@ -186,6 +176,27 @@ Several safeguards are built into the pipeline to ensure data quality and analyt
 - Unexpected or missing values never break execution
 - Text fields that may contain sensitive data are fully cleared
 - All transformations remain unchanged within a single run
+
+## Privacy & Compliance Considerations
+
+- The script contains no references to real company names, brands, or identifiers
+- All anonymization logic is reusable across clients
+- Free-text fields are fully removed to eliminate leakage risk
+- The output dataset is suitable for:
+  - Internal demos
+  - Analytics development
+  - Training and portfolio presentation
+
+This approach aligns with common GDPR and data-minimization principles.
+
+## Key Design Decisions
+
+- Original date columns are not shifted to avoid unrealistic timelines
+- Derived dates are generated separately to maintain logical sequencing
+- Client-specific string cleaning was intentionally removed to ensure:
+  - Client neutrality
+  - Portfolio safety
+  - Reusability across organizations
 
 ## Known Limitations
 
@@ -255,3 +266,8 @@ requisitions_anonymized.xlsx
 Fully anonymized, analytics-ready dataset
 
 Safe for demos, testing, and BI development
+
+## Notes
+
+This project was built as a reusable anonymization framework rather than a one-off script.
+It can be extended to support additional recruitment datasets such as applications, offers, and hires.
