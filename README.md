@@ -2,17 +2,15 @@
 
 ## Project Overview
 
-This project demonstrates a production-ready Python anonymization pipeline for recruitment requisitions data.  .
+This project implements a production-ready anonymization framework for recruitment requisition data.
 
-The script transforms a raw requisitions export into a fully anonymized, analytics-ready dataset by:
-- removing or anonymizing personal and sensitive information
-- preserving realistic business logic and data relationships
-- maintaining analytical usability for BI, reporting, and demos
+The goal is to transform raw, client-specific recruitment data into a fully anonymized, realistic, and analytically usable dataset that can be safely shared for:
+- BI development
+- Data model design
+- Analytics use cases
+- Portfolio and demo purposes
 
-The solution is designed to be:
-- Client-agnostic (no hard-coded company names or identifiers)
-- Safe for demos, analytics development, and portfolio use
-- Reusable across multiple clients and datasets
+The solution is designed to be client-agnostic, reusable across multiple organizations, and aligned with real-world recruitment processes.
 
 ## Business Problem & Use Case
 
@@ -86,11 +84,27 @@ Key principles:
   - City, County, and Currency are derived from a country-level reference table
 
 - **Dates**
-  - Original date values from the raw file are preserved to maintain realistic timelines
+  - Original date values from the raw file are preserved where appropriate to maintain realistic timelines
   - Derived dates (e.g. Approved Date, Posting Dates) are generated using logical offsets
 
 - **Free Text**
   - All free-text fields are explicitly cleared
+
+## Date Handling & Business Logic
+
+Special care is taken to ensure temporal realism:
+
+- Original dates from the raw dataset are preserved where appropriate
+- Synthetic dates are generated only when missing or required
+- All dates follow logical recruitment sequences:
+  - Intake Meeting → Approved Date → Posting Dates → Target Hire Date → Contract End Date
+
+### Date Validation Rules
+- No date exceeds **31 January 2026**
+- All generated dates are capped and validated
+- The script includes a final assertion to guarantee temporal integrity
+
+This approach avoids unrealistic scenarios such as approvals or hiring dates occurring in the future.
 
 ## Technical Architecture & Processing Flow
 
@@ -144,12 +158,6 @@ The script is intentionally ordered to avoid data dependency issues:
    - Only required columns are retained
    - Columns renamed to target reporting schema
 
-### Design Principles
-- Deterministic where required (IDs, people mapping)
-- Randomized where safe (cities, salaries, dates)
-- Stateless execution (no external dependencies)
-- Readable and maintainable (single-pass pipeline)
-
 ### Technologies Used
 - Python 3.14
 - pandas
@@ -189,14 +197,24 @@ Several safeguards are built into the pipeline to ensure data quality and analyt
 
 This approach aligns with common GDPR and data-minimization principles.
 
-## Key Design Decisions
+## Key Design Principles
 
-- Original date columns are not shifted to avoid unrealistic timelines
-- Derived dates are generated separately to maintain logical sequencing
-- Client-specific string cleaning was intentionally removed to ensure:
-  - Client neutrality
-  - Portfolio safety
-  - Reusability across organizations
+The anonymization logic follows several core principles:
+
+- **Realism over randomization**  
+  Synthetic data preserves real-world recruitment logic (dates, workflows, dependencies).
+
+- **Reference-driven consistency**  
+  Job attributes, grades, programmes, and salary ranges are derived from reference tables.
+
+- **Temporal integrity**  
+  All generated dates follow a logical sequence and are capped at a fixed maximum date.
+
+- **Client safety by design**  
+  No client-identifying strings, values, or business logic are hardcoded.
+
+- **Reusability**  
+  The script can be reused across multiple clients with minimal configuration changes.
 
 ## Known Limitations
 
@@ -236,17 +254,17 @@ This pipeline is designed to be easily extendable.
 - Schedule via Airflow or Azure Data Factory
 - Store outputs in cloud storage (Azure Blob / S3)
 
-## How to Run the Project
+## How to Run
 
-### Prerequisites
-- Python 3.9+
-- pandas
-- numpy
-- Faker
+1. Clone the repository
+2. Place required input files in the `requisitions/` folder
+3. Navigate to the `scripts/` directory
+4. Run:
 
-Install dependencies:
+```bash
+python anonymize_requisitions.py
 
-pip install pandas numpy faker
+The anonymized output file will be generated in the project directory.
 
 ### Required Files
 requisitions_raw.xlsx - raw ATS extract (not included)
@@ -257,17 +275,14 @@ geo_reference.csv - geographic reference data
 
 anonymize_requisitions.py - main script
 
-### Run the Script
-python anonymize_requisitions.py
+## Portfolio & Interview Use
 
-### Output
-requisitions_anonymized.xlsx
+This project demonstrates:
 
-Fully anonymized, analytics-ready dataset
+- Data anonymization design
+- Recruitment domain knowledge
+- Dimensional modeling awareness
+- Business-rule-driven data engineering
+- Defensive programming and validation
 
-Safe for demos, testing, and BI development
-
-## Notes
-
-This project was built as a reusable anonymization framework rather than a one-off script.
-It can be extended to support additional recruitment datasets such as applications, offers, and hires.
+It is intended as both a portfolio project and a foundation for building a centralized recruitment data model.
