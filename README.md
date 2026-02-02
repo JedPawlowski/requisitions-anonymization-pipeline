@@ -261,7 +261,6 @@ This pipeline is designed to be easily extendable.
 3. Navigate to the `scripts/` directory
 4. Run:
 
-```bash
 python anonymize_requisitions.py
 
 The anonymized output file will be generated in the project directory.
