@@ -1,287 +1,396 @@
-# Requisitions Data Anonymization Pipeline
+# 🚀 Recruitment Data Anonymization & Analytics Platform
 
-## Project Overview
+**Python + Power BI | End-to-End Data Engineering & BI Solution**
 
-This project implements a production-ready anonymization framework for recruitment requisition data.
+---
 
-The goal is to transform raw, client-specific recruitment data into a fully anonymized, realistic, and analytically usable dataset that can be safely shared for:
-- BI development
-- Data model design
-- Analytics use cases
-- Portfolio and demo purposes
+## 📌 Project Overview
 
-The solution is designed to be client-agnostic, reusable across multiple organizations, and aligned with real-world recruitment processes.
+This project demonstrates an **end-to-end recruitment analytics platform** that transforms raw Applicant Tracking System (ATS) data into a **fully anonymized, analytics-ready dataset** and delivers a **production-grade Power BI data model with KPI layer**.
 
-## Business Problem & Use Case
+It is designed to simulate **real-world enterprise recruitment data environments**, enabling safe data sharing for:
 
-Recruitment data often contains highly sensitive information, including personal data, internal structures, compensation ranges, and operational timelines.  
-Sharing such data for analytics development, dashboard prototyping, or stakeholder demonstrations requires a robust anonymization approach that maintains realism without exposing confidential information.
+* BI development
+* Data modeling
+* Analytics prototyping
+* Portfolio and demo use cases
 
-The goal of this project is to:
-- Enable analytics and data modeling work without access to real client data
-- Preserve meaningful recruitment logic (e.g. workflows, timelines, job structures)
-- Support centralized reporting models across multiple clients
+---
 
-### Solution
+## 🎯 Business Problem
 
-This project solves the problem by providing an automated anonymization pipeline that:
-- removes or obfuscates all sensitive identifiers
-- preserves realistic distributions, timelines, and relationships
-- keeps the dataset fully usable for reporting, analytics, and BI modeling
+Recruitment data contains highly sensitive information:
 
-The output can be safely shared while still behaving like real production data.
+* personal data (candidates, recruiters)
+* organizational structures
+* compensation data
+* hiring timelines
 
-## Data Sources & Inputs
+This makes it difficult to:
 
-The project operates on structured HR data exported from an Applicant Tracking System (ATS).
+* build dashboards
+* share data across teams
+* develop analytics solutions
 
-### Input Files
+---
 
-| File name | Description |
-|---------|-------------|
-| `requisitions_raw.xlsx` | Raw ATS requisition export containing sensitive and identifiable data |
-| `job_reference_table.xlsx` | Curated job taxonomy reference used to generate realistic job attributes |
-| `geo_reference.csv` | Country-level geographic reference for deriving city, region, and currency |
+## 💡 Solution
 
-### Key Characteristics of Input Data
-- non-standard Excel header layout
-- mixed data types (dates, text, numeric)
-- free-text fields containing sensitive content
-- inconsistent population of optional fields
+This project solves the problem by combining:
 
-The script is designed to handle these challenges defensively and consistently.
+### 🔹 1. Python Data Pipeline
 
-## Anonymization Strategy
+* Fully anonymizes sensitive data
+* Generates realistic synthetic data
+* Preserves business logic and relationships
 
-The anonymization logic focuses on structural realism rather than raw data masking.
+### 🔹 2. Power BI Data Model
 
-Key principles:
-- No client-specific identifiers, names, or keywords are hard-coded
-- All anonymization logic is deterministic or controlled-random for consistency
-- Original business logic and relationships are preserved
+* Star schema with multiple fact tables
+* Recruitment funnel analytics
+* KPI-driven reporting layer
 
-### Applied Techniques
+👉 The result is a **safe, realistic dataset** that behaves like production data.
 
-- **Identifiers**
-  - Job Requisition IDs are replaced with sequential surrogate keys
+---
 
-- **People**
-  - All personal names (Hiring Managers, Recruiters, Sourcers) are replaced using Faker
-  - No original names or emails are retained
+# 🏗️ End-to-End Architecture
 
-- **Organizational Structure**
-  - Operating Structure values are anonymized using generated dimension codes
+```text
+Raw ATS Data
+     ↓
+Mapping Generation (IDs)
+     ↓
+Python Anonymization Pipelines
+     ↓
+Synthetic + Anonymized Dataset
+     ↓
+Power BI Data Model (Star Schema)
+     ↓
+Recruitment Analytics KPIs
+```
 
-- **Job Taxonomy**
-  - Job Posting Titles are replaced with values from a reference dimension
-  - Job Family, Job Grade, and Programme Type are derived consistently from the reference table
+---
 
-- **Compensation**
-  - Salary ranges are generated based on Job Grade bands
-  - Values are realistic but non-identifiable
+# 📁 Repository Structure
 
-- **Geography**
-  - City, County, and Currency are derived from a country-level reference table
+```text
+project/
+├── applications/              # Processed application datasets (per client)
+├── requisitions/             # Raw + reference requisition data
+├── mappings/                 # Deterministic ID mapping tables
+├── scripts/                  # Python pipelines
+│   ├── anonymize_applications.py
+│   ├── anonymize_requisitions.py
+│   ├── generate_application_id_map.py
+│   └── generate_candidate_id_map.py
+├── documentation/
+│   └── README.md
+└── powerbi/
+    └── data_model.pbix
+```
 
-- **Dates**
-  - Original date values from the raw file are preserved where appropriate to maintain realistic timelines
-  - Derived dates (e.g. Approved Date, Posting Dates) are generated using logical offsets
+---
 
-- **Free Text**
-  - All free-text fields are explicitly cleared
+# 🔐 Anonymization Strategy
 
-## Date Handling & Business Logic
+The solution focuses on **realism over simple masking**.
 
-Special care is taken to ensure temporal realism:
+### Key Principles
 
-- Original dates from the raw dataset are preserved where appropriate
-- Synthetic dates are generated only when missing or required
-- All dates follow logical recruitment sequences:
-  - Intake Meeting → Approved Date → Posting Dates → Target Hire Date → Contract End Date
+* No real identifiers retained
+* Deterministic anonymization (reproducible results)
+* Business logic preserved
 
-### Date Validation Rules
-- No date exceeds **31 January 2026**
-- All generated dates are capped and validated
-- The script includes a final assertion to guarantee temporal integrity
+---
 
-This approach avoids unrealistic scenarios such as approvals or hiring dates occurring in the future.
+## 🔧 Techniques Used
 
-## Technical Architecture & Processing Flow
+### Identifiers
 
-The anonymization process is implemented as a single, reproducible Python pipeline designed for clarity, auditability, and extensibility.
+* Surrogate keys for requisitions, candidates, applications
+* Deterministic mapping tables ensure consistency
 
-### High-Level Flow
-1. Load reference dimensions (job taxonomy, geography)
-2. Load raw requisitions extract
-3. Create anonymized working copy
-4. Apply anonymization and derivation steps in logical order
-5. Select and rename final output schema
-6. Export anonymized dataset
+### People
 
-### Processing Order
-The script is intentionally ordered to avoid data dependency issues:
+* Names replaced using synthetic generation
+* No emails or original values retained
 
-1. **Reference data loading**
-   - Job reference table
-   - Geography reference table
+### Job & Organization
 
-2. **Primary identifiers**
-   - Job Requisition ID anonymization is applied first
-   - Ensures consistent joins and downstream references
+* Titles mapped to reference taxonomy
+* Organizational structures anonymized
 
-3. **People anonymization**
-   - Names are normalized before mapping
-   - Deterministic mapping ensures consistency across columns
+### Compensation
 
-4. **Organizational anonymization**
-   - Operating Structure anonymized after people
-   - Prevents accidental re-identification via hierarchy
+* Salary ranges generated by job grade
 
-5. **Job taxonomy transformation**
-   - Job Posting Titles are replaced using controlled vocabulary
-   - Job Family, Grade, and Programme Type derived from reference
+### Geography
 
-6. **Geographic enrichment**
-   - City, County, and Currency derived from country reference
-   - Ensures realism without leaking location data
+* Derived from reference tables (country → city → currency)
 
-7. **Date transformation**
-   - Global date offset applied
-   - Preserves time intervals and funnel logic
+### Free Text
 
-8. **Business logic derivations**
-   - Workflow Name
-   - Posting logic (internal/external)
-   - Pipeline and evergreen indicators
+* Fully removed to prevent leakage
 
-9. **Final schema enforcement**
-   - Only required columns are retained
-   - Columns renamed to target reporting schema
+---
 
-### Technologies Used
-- Python 3.14
-- pandas
-- numpy
-- Faker
+# 🧠 Synthetic Data Engine (Key Differentiator)
 
-## Data Quality & Validation
+The applications pipeline implements a **deterministic simulation engine**:
 
-Several safeguards are built into the pipeline to ensure data quality and analytical usefulness after anonymization.
+### 🎯 Features
 
-### Validation Checks
-- Column names are normalized immediately after loading source files
-- Missing job reference mappings are detected and logged
-- Geographic lookups fall back to `"Unknown"` values when no match is found
-- Blanks in boolean-style fields are explicitly handled (e.g. Evergreen roles default to "No")
+* Stable hashing (MD5) → reproducible outputs
+* Multi-client simulation (C1–C4)
+* Controlled randomness
 
-### Consistency Guarantees
-- The same original value always maps to the same anonymized value within a run
-- Date offsets preserve relative timing between events
-- Salary ranges remain logically consistent with job grades
-- Job taxonomy relationships (Title → Family → Grade → Programme) are preserved
+---
 
-### Defensive Defaults
-- Unexpected or missing values never break execution
-- Text fields that may contain sensitive data are fully cleared
-- All transformations remain unchanged within a single run
+## 📊 Recruitment Funnel Simulation
 
-## Privacy & Compliance Considerations
+```text
+Applications → CV Review → Interviews → Offers → Hires → Starters
+```
 
-- The script contains no references to real company names, brands, or identifiers
-- All anonymization logic is reusable across clients
-- Free-text fields are fully removed to eliminate leakage risk
-- The output dataset is suitable for:
-  - Internal demos
-  - Analytics development
-  - Training and portfolio presentation
+### Includes:
 
-This approach aligns with common GDPR and data-minimization principles.
+* Stage progression probabilities
+* Drop-off modeling
+* Offer acceptance logic
+* Candidate reneging
 
-## Key Design Principles
+---
 
-The anonymization logic follows several core principles:
+## ⏱ Temporal Realism
 
-- **Realism over randomization**  
-  Synthetic data preserves real-world recruitment logic (dates, workflows, dependencies).
+* Global timeline alignment
+* Historical spread (~2 years)
+* Hiring seasonality (spring/autumn peaks)
+* Strict validation rules
 
-- **Reference-driven consistency**  
-  Job attributes, grades, programmes, and salary ranges are derived from reference tables.
+👉 Ensures realistic analytics behavior
 
-- **Temporal integrity**  
-  All generated dates follow a logical sequence and are capped at a fixed maximum date.
+---
 
-- **Client safety by design**  
-  No client-identifying strings, values, or business logic are hardcoded.
+# 🧱 Data Model (Power BI)
 
-- **Reusability**  
-  The script can be reused across multiple clients with minimal configuration changes.
+## ⭐ Star Schema Design
 
-## Known Limitations
+### Fact Tables
 
-This project intentionally focuses on anonymization quality and analytical realism rather than full production hardening.
+* `fct_Requisitions` → job-level data
+* `fct_Applications` → candidate-level data
 
-### Current Limitations
-- Reference data must be kept up to date manually
-- The pipeline assumes consistent column naming in the source extract
-- No automated unit tests are included
-- Geographic enrichment uses random sampling within country, not weighted distributions
+### Dimensions
 
-### Non-Goals
-- This project does not aim to preserve exact headcount distribution
-- It does not attempt to mask outliers using advanced statistical techniques
-- It is not designed for real-time or streaming data
+* `dim_Client`
+* `dim_Job`
+* `dim_Location`
+* `dim_Source`
+* `dim_Candidate`
+* `dim_Person`
+* `dim_App_Status`
+* `dim_Requisition_Attributes`
 
-## Possible Extensions
+---
 
-This pipeline is designed to be easily extendable.
+## 🔗 Key Design Features
 
-### Technical Extensions
-- Add automated unit tests (pytest)
-- Introduce schema validation using pandera or Great Expectations
-- Externalize configuration into YAML or JSON
-- Add logging instead of print statements
-- Package as a reusable Python module
+### ✅ Multi-Fact Model
 
-### Data & Analytics Extensions
-- Support multiple anonymization profiles (light / strict)
-- Introduce synthetic time-series generation
-- Weight geographic sampling by hiring volume
-- Add candidate-level anonymization for ATS datasets
-- Generate data quality metrics post-anonymization
+* Separate grains for requisitions and applications
+* Enables full funnel analysis
 
-### Platform Extensions
-- Containerize with Docker
-- Schedule via Airflow or Azure Data Factory
-- Store outputs in cloud storage (Azure Blob / S3)
+### ✅ Shared Dimensions
 
-## How to Run
+* Consistent filtering across facts
 
-1. Clone the repository
-2. Place required input files in the `requisitions/` folder
-3. Navigate to the `scripts/` directory
-4. Run:
+### ✅ Multiple Date Relationships
 
-python anonymize_requisitions.py
+* Supports advanced time-based metrics
+* (e.g., time to hire, time to offer)
 
-The anonymized output file will be generated in the project directory.
+---
 
-### Required Files
-requisitions_raw.xlsx - raw ATS extract (not included)
+# 📊 KPI Framework
 
-job_reference_table.xlsx - job taxonomy reference
+The model includes a **comprehensive KPI layer** structured into categories:
 
-geo_reference.csv - geographic reference data
+---
 
-anonymize_requisitions.py - main script
+## 📦 Volume KPIs
 
-## Portfolio & Interview Use
+* # Applications
+* # CV Reviewed
+* # Interviews
+* # Offers Made
+* # Hires
+* # Starters
 
-This project demonstrates:
+---
 
-- Data anonymization design
-- Recruitment domain knowledge
-- Dimensional modeling awareness
-- Business-rule-driven data engineering
-- Defensive programming and validation
+## 📈 Conversion KPIs
 
-It is intended as both a portfolio project and a foundation for building a centralized recruitment data model.
+* CV → Interview
+* Interview → Offer
+* Offer → Hire
+* Initiated → Submitted
+
+---
+
+## ⚡ Speed KPIs
+
+* Time to Offer
+* Time to Post
+* Time to Shortlist
+* Aged Requisitions
+
+---
+
+## 🎯 Quality KPIs
+
+* Offer Acceptance %
+* Offer Dropout %
+* Withdrawal %
+
+---
+
+## 💰 Financial KPIs
+
+* Agency Usage %
+* Source Mix %
+
+---
+
+## 🧠 KPI Design Philosophy
+
+```text
+Volume  → How much
+Ratio   → How efficient
+Speed   → How fast
+Quality → How good
+Cost    → How expensive
+```
+
+👉 Mirrors real enterprise recruitment analytics
+
+---
+
+# 🧪 Data Quality & Validation
+
+The pipeline includes:
+
+* Deterministic mapping validation
+* Date sequence validation
+* Funnel integrity checks
+* Null handling and defaults
+* Schema enforcement
+
+---
+
+# 🔄 Multi-Client Simulation
+
+The project simulates multiple clients:
+
+* C1, C2, C3, C4
+* Different data volumes
+* Same underlying logic
+
+👉 Enables:
+
+* benchmarking
+* scalable analytics models
+* consulting-style use cases
+
+---
+
+# ⚙️ How to Run
+
+## 1. Clone repository
+
+```bash
+git clone <repo_url>
+```
+
+## 2. Install dependencies
+
+```bash
+pip install pandas numpy faker
+```
+
+## 3. Add input files
+
+Place in appropriate folders:
+
+* requisitions_raw.xlsx
+* applications_raw.csv
+* reference tables
+
+## 4. Run pipelines
+
+```bash
+python scripts/anonymize_requisitions.py
+python scripts/anonymize_applications.py
+```
+
+---
+
+# 🚀 What This Project Demonstrates
+
+## 💡 Technical Skills
+
+* Data anonymization design
+* Synthetic data generation
+* Python data engineering
+* Power BI data modeling
+* DAX KPI design
+
+---
+
+## 🧠 Analytical Thinking
+
+* Recruitment funnel modeling
+* Conversion analysis
+* Time-based metrics
+* Business-driven KPIs
+
+---
+
+## 🏗️ Architecture Skills
+
+* Star schema design
+* Multi-fact modeling
+* Deterministic pipelines
+* Reusable data frameworks
+
+---
+
+# 📌 Why This Matters
+
+This project replicates **real enterprise challenges**:
+
+* Working without access to production data
+* Building reusable analytics models
+* Preserving business logic under anonymization
+* Designing scalable BI solutions
+
+---
+
+# 👨‍💼 Portfolio Context
+
+This project is designed to showcase:
+
+* End-to-end data solution design
+* Recruitment domain expertise
+* Production-ready thinking
+* BI + Data Engineering integration
+
+---
+
+## ⭐ Summary
+
+> This is not just a dashboard project.
+> It is a **complete analytics system** — from raw data to business insights.
+
+---
