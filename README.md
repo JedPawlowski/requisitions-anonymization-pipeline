@@ -145,7 +145,7 @@ The solution focuses on **realism rather than simple masking**.
 
 ---
 
-# 🧠 Synthetic Data Engine (Key Differentiator)
+# 🧠 Synthetic Data Engine
 
 The applications pipeline includes a **deterministic synthetic data engine**.
 
@@ -374,31 +374,12 @@ python scripts/anonymize_applications.py
 
 ---
 
-# 📌 Why This Matters
-
-This project reflects real enterprise challenges:
-
-* working without access to production data
-* building reusable analytics models
-* preserving business logic under anonymization
-* designing scalable BI solutions
-
----
-
-# 👨‍💼 Portfolio Context
-
-This project showcases:
-
-* end-to-end data solution design
-* recruitment domain expertise
-* production-ready thinking
-* integration of data engineering and BI
-
----
-
 ## ⭐ Summary
 
-> This is not just a dashboard project.
-> It is a **complete analytics system — from raw data to business insights.**
+This project demonstrates how to build a complete analytics solution under real-world constraints — where sensitive data cannot be used directly.
+
+By combining data anonymization, synthetic data generation, and a robust Power BI model, it enables realistic recruitment analytics while ensuring full data privacy.
+
+It reflects an end-to-end approach to data: from raw inputs to business insights — with a strong focus on usability, scalability, and real-world applicability.
 
 ---
